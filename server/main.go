@@ -20,7 +20,7 @@ func putBasket(w http.ResponseWriter, r *http.Request) {
 		currentBasket, err := txn.Get([]byte(id))
 		var value []byte
 		basket := make(map[string]interface{})
-		ownBasket := make(map[string]interface{})
+		ownBasket := []interface{}{}
 		if err == badger.ErrKeyNotFound {
 			value = []byte("{}")
 		} else if err != nil {
@@ -57,8 +57,10 @@ func putBasket(w http.ResponseWriter, r *http.Request) {
 
 func postBasket(w http.ResponseWriter, r *http.Request) {
 	id := uuid.New().String()
+        url := r.URL.Query().Get("url")
 	err := db.Update(func(txn *badger.Txn) error {
 		txn.Set([]byte(id), []byte("{}"))
+                txn.Set([]byte(id+"-meta"), []byte(url))
 		return nil
 	})
 	if err != nil {
@@ -111,6 +113,7 @@ func deleteBasket(w http.ResponseWriter, r *http.Request) {
         }
 }
 
+
 // combine handlers into one
 func basketHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -125,6 +128,22 @@ func basketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func CORS(next http.HandlerFunc) http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+    w.Header().Add("Access-Control-Allow-Origin", "*")
+    w.Header().Add("Access-Control-Allow-Credentials", "true")
+    w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+    w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+    if r.Method == "OPTIONS" {
+        http.Error(w, "No Content", http.StatusNoContent)
+        return
+    }
+
+    next(w, r)
+  }
+}
+
 func main() {
 	var err error
 	db, err = badger.Open(badger.DefaultOptions("").WithInMemory(true))
@@ -132,7 +151,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	http.HandleFunc("/basket", basketHandler)
+	http.HandleFunc("/basket", CORS(basketHandler))
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
@@ -160,6 +179,13 @@ func main() {
           w.Write([]byte("returns \"Basket deleted\"\n"))
 
         })
+        http.HandleFunc("/id/:id", func(w http.ResponseWriter, r *http.Request) {
+          // generate HowTo
+        })
+        http.HandleFunc("/host", func(w http.ResponseWriter, r *http.Request) {
+          // generate HowTo
+        })
+          
         uri := ":8080"
         if len(os.Args) > 1 {
           uri = os.Args[1]
