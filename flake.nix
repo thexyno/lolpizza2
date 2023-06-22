@@ -27,7 +27,7 @@
       
       nixosModule = { config, options, lib, pkgs, ... }:
         let
-          cfg = config.services.xynoblog;
+          cfg = config.services.lolpizza2;
           lp = self.packages.${pkgs.system}.default;
         in
         with lib;
@@ -40,17 +40,13 @@
             };
             listen = mkOption {
               type = types.str;
-              default = "8393";
+              default = ":8393";
               description = "the domain/post lolpizza2 listens on";
             };
           };
           config = mkIf cfg.enable {
-            environment.systemPackages = [
-              xb
-            ];
-
-            systemd.services.xynoblog = {
-              description = "xynoblog blog engine";
+            systemd.services.lolpizza2 = {
+              description = "lolpizza";
               after = [ "network.target" ];
               wantedBy = [ "multi-user.target" ];
               serviceConfig = {
@@ -60,7 +56,7 @@
                 ProtectHome = "true";
                 ProtectSystem = "strict";
                 AmbientCapabilities = "CAP_NET_BIND_SERVICE";
-                ExecStart = "${lp}/bin/lolpizza serve ${cfg.listen}";
+                ExecStart = "${lp}/bin/lolpizza2 ${cfg.listen}";
               };
             };
           };
