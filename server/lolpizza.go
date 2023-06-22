@@ -6,16 +6,21 @@ import (
 	"log"
 	"net/http"
 	"os"
+        _ "embed"
 
 	badger "github.com/dgraph-io/badger/v4"
 	"github.com/google/uuid"
 )
+
+//go:embed lolpizza2.user.js
+var script []byte
 
 var db *badger.DB
 
 type BasketMeta struct {
   Url string
   Locked bool
+  ActiveAddress string
 }
 
 func putBasket(w http.ResponseWriter, r *http.Request) {
@@ -85,7 +90,8 @@ func putBasket(w http.ResponseWriter, r *http.Request) {
 func postBasket(w http.ResponseWriter, r *http.Request) {
 	id := uuid.New().String()
 	url := r.URL.Query().Get("url")
-        js, err := json.Marshal(BasketMeta{Url: url, Locked: false})
+	activeAddress := r.URL.Query().Get("activeAddress")
+        js, err := json.Marshal(BasketMeta{Url: url, Locked: false, ActiveAddress: activeAddress})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -262,39 +268,17 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// describe usage
+	http.HandleFunc("/a", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("LolPizza2 Basket API\n"))
-		w.Write([]byte("\n"))
-		w.Write([]byte("Usage: \n"))
-		w.Write([]byte("GET /basket?id=<basket_id> - get basket\n"))
-                w.Write([]byte("returns basket json of form: { \"content\": { \"user1\": {basket}, ... }, \"meta\": { \"name\": \"lieferando id\", \"locked\": bool } }\n"))
-		w.Write([]byte("\n"))
-
-		w.Write([]byte("POST /basket - create basket\n"))
-		w.Write([]byte("returns basket id as string\n"))
-		w.Write([]byte("\n"))
-
-                w.Write([]byte("POST /basket/lock?id=<basket_id> - lock basket\n"))
-                w.Write([]byte("locks basket\n"))
-
-		w.Write([]byte("PUT /basket?id=<basket_id>&name=<user_name> - add own basket to basket\n"))
-		w.Write([]byte("returns basket json of form: { \"name\": Basket }\n"))
-		w.Write([]byte("\n"))
-
-		w.Write([]byte("DELETE /basket?id=<basket_id> - delete basket\n"))
-		w.Write([]byte("returns \"Basket deleted\"\n"))
-
+		w.Write([]byte("Loading"))
 	})
-	http.HandleFunc("/id/:id", func(w http.ResponseWriter, r *http.Request) {
-		// generate HowTo
-	})
-	http.HandleFunc("/host", func(w http.ResponseWriter, r *http.Request) {
-		// generate HowTo
-	})
-
+        http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+          http.Redirect(w, r, "/lolpizza2.user.js", http.StatusTemporaryRedirect)
+        })
+        http.HandleFunc("/lolpizza2.user.js", func(w http.ResponseWriter, r *http.Request) {
+          w.Header().Set("Content-Type", "application/javascript")
+          w.Write(script)
+        })
 	uri := ":8080"
 	if len(os.Args) > 1 {
 		uri = os.Args[1]

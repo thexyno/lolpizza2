@@ -1,29 +1,28 @@
 import { Component, For } from "solid-js";
 import { basketItem, baskets } from "./types";
 
-const ItemTable: Component<{data: baskets}> = (props) => {
-const data  = props.data;
+const ItemTable: Component<{ data?: baskets }> = (props) => {
   return (
-      <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Items</th>
-            <th>Total Price</th>
-          </tr>
-        </thead>
-        <tbody>
-        <For each={Object.entries(data)}>
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Items</th>
+          <th>Total Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <For each={Object.entries(props.data ?? {})}>
           {([user, items]) => (
             <tr>
               <td>{user}</td>
-              <td>{items.map((item: basketItem) => `${item.name} x ${item.quantity} (${calculatePrice(item)/100.0}€)`).join(', ')}</td>
-              <td>{items.map(calculatePrice).reduce((acc, x) => acc + x, 0)/100.0}€</td>
+              <td>{items.map((item: basketItem) => `${item.name} x ${item.quantity} (${calculatePrice(item) / 100.0}€)`).join(', ')}</td>
+              <td>{items.map(calculatePrice).reduce((acc, x) => acc + x, 0) / 100.0}€</td>
             </tr>
           )}
         </For>
-        </tbody>
-      </table>
+      </tbody>
+    </table>
   );
 }
 

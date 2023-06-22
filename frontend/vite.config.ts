@@ -1,12 +1,17 @@
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
+import monkey from 'vite-plugin-monkey';
 
 export default defineConfig({
-  plugins: [solidPlugin()],
-  server: {
-    port: 3000,
-  },
-  build: {
-    target: 'esnext',
-  },
+  plugins: [
+    solidPlugin(),
+    monkey({
+      entry: 'src/index.tsx',
+      userscript: {
+        icon: 'https://vitejs.dev/logo.svg',
+        namespace: 'npm/vite-plugin-monkey',
+        match: ['https://*.lieferando.de/*', 'https://lolpizza.ragon.xyz/*', 'http://localhost:8080/*'],
+      },
+    }),
+  ],
 });
