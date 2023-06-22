@@ -9,7 +9,7 @@ import ItemTable from './ItemTable';
 export const LocalStorageUrl = "LolPizzaUrl";
 export const LocalStorageTag = "LolPizzaBasketId";
 
-export const url2 = localStorage.getItem(LocalStorageUrl) ?? 'http://localhost:8080';
+export const url2 = localStorage.getItem(LocalStorageUrl) ?? 'https://lolpizza.ragon.xyz';
 
 
 const App: Component = () => {
@@ -81,7 +81,7 @@ const App: Component = () => {
               <Host locked={locked()} data={content()} basketId={basketId()} setBasketId={setBasketId} refetch={refetch} />
             </Match>
             <Match when={mode() === 'client'}>
-              <Client basketId={basketId()} locked={locked()} />
+              <Client url={url()} basketId={basketId()} locked={locked()} />
             </Match>
           </Switch>
         </Show>

@@ -1011,7 +1011,7 @@
       const restaurantId = await getRestaurantInfo().then((x) => x.restaurantId);
       const order = JSON.parse(window.localStorage.getItem("savedOrders"))[restaurantId]["cartItems"];
       if (name() != "") {
-        fetch(`http://localhost:8080/basket?id=${props.basketId}&name=${encodeURIComponent(name())}`, {
+        fetch(`${props.url}/basket?id=${props.basketId}&name=${encodeURIComponent(name())}`, {
           method: "PUT",
           body: JSON.stringify(order)
         });
@@ -1065,7 +1065,7 @@
   const _tmpl$ = /* @__PURE__ */ template(`<br>`), _tmpl$2 = /* @__PURE__ */ template(`<div id="lolpizza-app"><div id="lolpizza-header"><span>Lolpizza2 in <!> mode</span><button>Switch</button></div><br><div><p>ID: <input> <button>Fetch</button> <br></p></div><div>`), _tmpl$3 = /* @__PURE__ */ template(`<span>Locked`), _tmpl$4 = /* @__PURE__ */ template(`<span>`);
   const LocalStorageUrl = "LolPizzaUrl";
   const LocalStorageTag = "LolPizzaBasketId";
-  const url2 = localStorage.getItem(LocalStorageUrl) ?? "http://localhost:8080";
+  const url2 = localStorage.getItem(LocalStorageUrl) ?? "https://lolpizza.ragon.xyz";
   const App = () => {
     const [mode, setMode] = createSignal(window.lolpizzaMode ?? "host");
     const [basketId, setBasketId] = createSignal("");
@@ -1179,6 +1179,9 @@
                 },
                 get children() {
                   return createComponent(Client, {
+                    get url() {
+                      return url();
+                    },
                     get basketId() {
                       return basketId();
                     },

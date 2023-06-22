@@ -2,13 +2,13 @@ import { Component, createSignal, Show } from "solid-js";
 import { getRestaurantInfo } from "./lieferando-api";
 import { basketItem } from "./types";
 
-const Client: Component<{ locked: boolean, basketId: string }> = (props) => {
+const Client: Component<{ locked: boolean, basketId: string, url: string }> = (props) => {
   const [name, setName] = createSignal(window.localStorage.getItem("LolPizzaName") ?? "");
   async function send(): Promise<void> {
     const restaurantId = await getRestaurantInfo().then(x => x.restaurantId);
     const order = JSON.parse(window.localStorage.getItem("savedOrders")!)[restaurantId]["cartItems"] as basketItem[];
     if (name() != "") {
-      fetch(`http://localhost:8080/basket?id=${props.basketId}&name=${encodeURIComponent(name())}`, {
+      fetch(`${props.url}/basket?id=${props.basketId}&name=${encodeURIComponent(name())}`, {
         method: "PUT",
         body: JSON.stringify(order)
       })
