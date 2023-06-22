@@ -18,6 +18,8 @@
 }
 .innerheader {
   padding: 10px;
+  display: flex;
+  justify-content: space-between;
   cursor: move;
   z-index: 10;
   background-color: #2196F3;
