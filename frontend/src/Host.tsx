@@ -1,7 +1,7 @@
-import { Accessor, Component, createResource, createSignal, For, Setter, Show } from "solid-js";
-import { url2 } from "./App";
+import { Component, Setter, Show } from "solid-js";
 import { basketItem, baskets } from "./types";
 import { getRestaurantInfo } from "./lieferando-api";
+import { useP2P } from "./P2PProvider";
 
 type mp = { [s: string]: any };
 
@@ -37,28 +37,22 @@ const apply = async (data?: baskets) => {
   window.location.reload();
 }
 
-const lock = async (data: string) =>
-  await fetch(`${url2}/basket/lock?id=${data}`, { method: "POST" }).then((res) => res.text()).then((res) => console.log(res));
-const unlock = async (data: string) =>
-  await fetch(`${url2}/basket/lock?id=${data}&unlock=true`, { method: "POST" }).then((res) => res.text()).then((res) => console.log(res));
-
-const clearBasket = async (data: string, set: Setter<string>, refetch: Function) => {
-  await fetch(`${url2}/basket?id=${data}`, { method: "DELETE" }).then((res) => res.text()).then(() => {
-    window.localStorage.removeItem('LolPizzaBasketId');
-    set("");
-    refetch();
-  });
-}
-
-const Host: Component<{ data?: baskets, basketId: string, setBasketId: Setter<string>, refetch: Function, locked: boolean }> = (props) => {
+const Host: Component = () => {
+  const [p2p, p2pFun] = useP2P();
+  console.log(p2p());
   return (
-    <div>
-      <Show when={props.locked} fallback={<button onClick={() => lock(props.basketId).then(() => props.refetch())}>Lock Basket</button>}>
-        <button onClick={() => unlock(props.basketId).then(() => props.refetch())}>Unlock Basket</button>
-      </Show>
-      <button onClick={() => apply(props.data)}>Apply Basket to real basket</button>
-      <button onClick={() => clearBasket(props.basketId, props.setBasketId, props.refetch)}>Clear Basket</button>
-    </div>
+    <>
+      <div>
+        <Show when={p2p().locked} fallback={<button onClick={() => p2pFun.lock(true)}>Lock Basket</button>}>
+          <button onClick={() => p2pFun.lock(false)}>Unlock Basket</button>
+        </Show>
+        <button onClick={() => apply(p2p().baskets)}>Apply Basket to real basket</button>
+        <button onClick={() => p2pFun.createNewHost()}>Clear Basket</button>
+      </div>
+      <div>
+        MOTD: <input type="text" value={p2p().motd} onInput={(e) => p2pFun.setMotd(e.currentTarget.value)} />
+      </div>
+    </>
   );
 }
 

@@ -1,17 +1,18 @@
 import { Component, createSignal, Show } from "solid-js";
-import { getRestaurantInfo } from "./lieferando-api";
-import { basketItem } from "./types";
+import { basketItem, useP2P } from "./P2PProvider";
 
-const Client: Component<{ locked: boolean, basketId: string, url: string }> = (props) => {
+const Client: Component = () => {
+  const [p2p, p2pFun] = useP2P();
   const [name, setName] = createSignal(window.localStorage.getItem("LolPizzaName") ?? "");
   async function send(): Promise<void> {
-    const restaurantId = await getRestaurantInfo().then(x => x.restaurantId);
+    const restaurantId = p2p().restaurantInfo?.restaurantId;
+    if (!restaurantId) {
+      alert("No restaurant id");
+      return;
+    }
     const order = JSON.parse(window.localStorage.getItem("savedOrders")!)[restaurantId]["cartItems"] as basketItem[];
     if (name() != "") {
-      fetch(`${props.url}/basket?id=${props.basketId}&name=${encodeURIComponent(name())}`, {
-        method: "PUT",
-        body: JSON.stringify(order)
-      })
+      p2pFun.sendBasket(order,name());
     }
   }
   function saveName(nm: string) {
@@ -20,11 +21,12 @@ const Client: Component<{ locked: boolean, basketId: string, url: string }> = (p
   }
 
   return (
-    <Show when={!props.locked} fallback={<>Basket Locked</>}>
+    <Show when={!p2p().locked} fallback={<>Basket Locked</>}>
       <div>
         <label for="name">Name: </label>
         <input id="name" placeholder="xXCoolerTypXx" type="text" value={name()} onInput={(e) => saveName(e.currentTarget.value)} />
         <button onClick={() => send()}>Send</button>
+        <button onClick={() => p2pFun.clearBasket(name())}>Clear</button>
       </div>
     </Show>
   );

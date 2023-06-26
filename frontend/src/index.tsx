@@ -1,7 +1,6 @@
 /* @refresh reload */
 import { render } from 'solid-js/web';
-
-import App, { LocalStorageTag, LocalStorageUrl } from './App';
+import App from './App';
 
 const myLittleInterval = setInterval(() => {
   const el = document.querySelector('section[data-qa="page-section"]');
@@ -19,24 +18,13 @@ const myLittleInterval = setInterval(() => {
 }, 300);
 
 export interface hash {
-  basketId: string;
-  domain: string;
+  peerId: string;
+  slug: string;
 }
 
-if (location.origin === 'https://lolpizza.ragon.xyz' || location.origin === 'http://localhost:8080') {
-  fetch('/basket?id=' + location.hash.slice(1)).then(x => x.json()).then(x => {
-    let hsh: hash = { basketId: location.hash.slice(1), domain: location.origin };
+const GH_PAGES = "https://thexyno.github.io/lolpizza2";
+if (location.origin === GH_PAGES || location.origin === 'http://localhost:8080') {
+    let hsh = JSON.parse(decodeURIComponent(location.hash.slice(1))) as hash;
     console.log(hsh);
-    location.href = `${x.meta.Url}#LPBasketId=${encodeURIComponent(JSON.stringify(hsh))}`;
-  });
-}
-
-if (location.hash.startsWith('#LPBasketId=')) {
-  const hsh = JSON.parse(decodeURIComponent(location.hash.slice('#LPBasketId='.length))) as hash;
-  if (hsh) {
-    console.log(hsh);
-    localStorage.setItem(LocalStorageTag, hsh.basketId);
-    localStorage.setItem(LocalStorageUrl, hsh.domain);
-    location.hash = '';
-  }
+    location.href = `https://www.lieferando.de/speisekarte/${hsh.slug}#LPBasketId=${encodeURIComponent(JSON.stringify(hsh))}`;
 }
