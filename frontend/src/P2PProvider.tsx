@@ -46,7 +46,7 @@ type P2PContextType = [Accessor<P2P>, P2PContextFunctions];
 
 const P2PContext = createContext<P2PContextType>([{} as Accessor<P2P>, {} as P2PContextFunctions]);
 
-export const BACKEND_URL = import.meta.env.BACKEND_URL ?? "http://localhost:8080";
+export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8080/").substr(0, (import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8080/").length - 1);
 
 const emptyP2P: P2P = { baskets: {}, hasPaid: [], id: "", mode: "notInitialized", motd: "", locked: false };
 export type LocalStorageData = { id?: string; mode?: "client" | "host"; secret?: string; restaurantSlug?: string };

@@ -73,7 +73,7 @@
           pkgs = nixpkgsFor.${system};
         in
         {
-          default = self.packages.${system}.lp2 "https://lolpizza.ragon.xyz";
+          default = self.packages.${system}.lp2 "https://lolpizza.ragon.xyz/";
           frontend = backendUrl:  pkgs.mkPnpmPackage {
                 src = ./frontend;
                 VITE_BACKEND_URL = backendUrl;
