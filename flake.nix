@@ -3,8 +3,10 @@
 
   # Nixpkgs / NixOS version to use.
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+  inputs.pnpm2nix.url = "github:nzbr/pnpm2nix-nzbr";
+  inputs.pnpm2nix.inputs.nixpkgs.follows = "nixpkgs";
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, pnpm2nix }:
     let
 
       # to work with older version of flakes
@@ -24,11 +26,11 @@
 
     in
     {
-      
+
       nixosModule = { config, options, lib, pkgs, ... }:
         let
           cfg = config.services.lolpizza2;
-          lp = self.packages.${pkgs.system}.default;
+          lp = self.packages.${pkgs.system}.lp2;
         in
         with lib;
         {
@@ -43,6 +45,11 @@
               default = ":8393";
               description = "the domain/post lolpizza2 listens on";
             };
+            url = mkOption {
+              type = types.str;
+              default = "https://lolpizza.ragon.xyz";
+              description = "the url to the frontend";
+            };
           };
           config = mkIf cfg.enable {
             systemd.services.lolpizza2 = {
@@ -56,7 +63,7 @@
                 ProtectHome = "true";
                 ProtectSystem = "strict";
                 AmbientCapabilities = "CAP_NET_BIND_SERVICE";
-                ExecStart = "${lp}/bin/lolpizza2 ${cfg.listen}";
+                ExecStart = "${lp cfg.url}/bin/lolpizza2 ${cfg.listen}";
               };
             };
           };
@@ -66,7 +73,14 @@
           pkgs = nixpkgsFor.${system};
         in
         {
-          default =
+          default = self.packages.${system}.lp2 "https://lolpizza.ragon.xyz";
+          lp2 = backendUrl:
+            let
+              frontend = pnpm2nix.mkPnpmPackage {
+                src = ./frontend;
+                BACKEND_URL = backendUrl;
+              };
+            in
             pkgs.buildGoModule {
               pname = "lolpizza2";
               inherit version;
@@ -83,6 +97,10 @@
               # To begin with it is recommended to set this, but one must
               # remeber to bump this hash when your dependencies change.
               #vendorSha256 = pkgs.lib.fakeSha256;
+              beforeBuild = ''
+                mkdir -p $src/frontend/dist
+                cp ${frontend}.frontend}/dist/* $src/frontend/dist
+              '';
 
               vendorSha256 = "sha256-Jk1ybSRlXwgWsA4YY+zoW9WmJePsx95Fuzcih6ciWys=";
             };
@@ -91,7 +109,7 @@
       devShell = forAllSystems (system:
         let pkgs = nixpkgsFor.${system}; in
         (pkgs.mkShell {
-          buildInputs = [ pkgs.nixpkgs-fmt pkgs.gopls pkgs.go pkgs.nodePackages.pnpm];
+          buildInputs = [ pkgs.nixpkgs-fmt pkgs.gopls pkgs.go pkgs.nodePackages.pnpm ];
         }));
     };
 }

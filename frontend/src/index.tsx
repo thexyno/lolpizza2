@@ -1,6 +1,7 @@
 /* @refresh reload */
 import { render } from 'solid-js/web';
 import App from './App';
+import { BACKEND_URL } from './P2PProvider';
 
 const myLittleInterval = setInterval(() => {
   const el = document.querySelector('section[data-qa="page-section"]');
@@ -23,7 +24,7 @@ export interface hash {
 }
 
 const GH_PAGES = "https://thexyno.github.io/lolpizza2";
-if (location.origin === GH_PAGES || location.origin === 'http://localhost:8080' || location.origin === 'https://lolpizza.ragon.xyz') {
+if (location.origin === GH_PAGES || location.origin === 'http://localhost:8080' || location.origin === BACKEND_URL) {
   if (location.hash[0] === "#") {
     let hsh = location.hash.slice(1).split("/")[1];
     console.log(hsh);
