@@ -23,8 +23,10 @@ export interface hash {
 }
 
 const GH_PAGES = "https://thexyno.github.io/lolpizza2";
-if (location.origin === GH_PAGES || location.origin === 'http://localhost:8080') {
-    let hsh = JSON.parse(decodeURIComponent(location.hash.slice(1))) as hash;
+if (location.origin === GH_PAGES || location.origin === 'http://localhost:8080' || location.origin === 'https://lolpizza.ragon.xyz') {
+  if (location.hash[0] === "#") {
+    let hsh = location.hash.slice(1).split("/")[1];
     console.log(hsh);
-    location.href = `https://www.lieferando.de/speisekarte/${hsh.slug}#LPBasketId=${encodeURIComponent(JSON.stringify(hsh))}`;
+    location.href = `https://www.lieferando.de/speisekarte/${hsh}${location.hash}`;
+  }
 }

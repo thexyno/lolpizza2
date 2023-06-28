@@ -67,12 +67,12 @@
         in
         {
           default =
-            pkgs.buildGoModule rec {
+            pkgs.buildGoModule {
               pname = "lolpizza2";
               inherit version;
               # In 'nix develop', we don't need a copy of the source tree
               # in the Nix store.
-              src = ./server;
+              src = ./.;
 
               # This hash locks the dependencies of this package. It is
               # necessary because of how Go requires network access to resolve
@@ -82,9 +82,9 @@
               # it should be "out-of-band" with other tooling (eg. gomod2nix).
               # To begin with it is recommended to set this, but one must
               # remeber to bump this hash when your dependencies change.
-              #vendorSha256 = pkgs.lib.fakeSha256;
+              vendorSha256 = pkgs.lib.fakeSha256;
 
-              vendorSha256 = "sha256-mBgDs3YYBFm8gWy/JLDsZuapfkxm1+T2iJJAjOIe+TQ=";
+              #vendorSha256 = "sha256-mBgDs3YYBFm8gWy/JLDsZuapfkxm1+T2iJJAjOIe+TQ=";
             };
         });
 

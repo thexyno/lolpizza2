@@ -1,10 +1,10 @@
-import { Component, Match, Show, Switch } from 'solid-js';
+import { Component, Show } from 'solid-js';
 
 import styles from './App.module.css';
 import Host from './Host';
 import Client from './Client';
 import ItemTable from './ItemTable';
-import { P2PProvider, useP2P } from './P2PProvider';
+import { BACKEND_URL, P2PProvider, useP2P } from './P2PProvider';
 import { restaurantSlug } from './lieferando-api';
 
 
@@ -12,9 +12,8 @@ import { restaurantSlug } from './lieferando-api';
 const _App: Component = () => {
   const [p2p, p2pFun] = useP2P();
   const locked = () => p2p().locked;
-  const content = () => p2p().baskets;
   const mode = () => p2p().mode;
-  const basketId = () => p2p().hostPeerId;
+  const basketId = () => p2p().id;
   const motd = () => p2p().motd;
 
 
@@ -28,12 +27,6 @@ const _App: Component = () => {
         <Show when={locked()}>
           <span>Locked</span>
         </Show>
-        <Show when={mode() === "client"}>
-          <span>Connection {p2p().hostPeer?.open ? "established" : "lost"}</span>
-        </Show>
-        <Show when={mode() === "host"}>
-          <span>Connections: {p2p().peers.map(x => x.connectionId)}</span>
-        </Show>
       </div>
       <br />
       <div style={{ padding: '4px' }}>
@@ -42,12 +35,12 @@ const _App: Component = () => {
           <button onClick={() => p2pFun.createNewClient(basketId())}>Reconnect</button>
         </Show>
         <br />
-        <button onClick={() => p2pFun.createNewHost("", true)}>Create New Host</button>
+        <button onClick={() => p2pFun.createNewHost()}>Create New Host</button>
         <br />
       </div>
       <div>
         <Show when={basketId() !== ""}>
-          URL: {location.href.split("#")[0]}#LPBasketId={encodeURIComponent(JSON.stringify({ peerId: basketId(), slug: restaurantSlug() }))}<br />
+          URL: {BACKEND_URL}#LP2={basketId()}/{restaurantSlug()}<br />
           <ItemTable />
           <Show when={mode() === 'host'} >
             <p>HOST Settings</p>

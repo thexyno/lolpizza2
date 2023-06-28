@@ -5,7 +5,7 @@ import { useP2P } from "./P2PProvider";
 const ItemTable: Component = () => {
   const [p2p, p2pFun] = useP2P();
   const data = () => p2p().baskets;
-  const hasPaid = () => p2p().hasPaid;
+  const hasPaid = () => p2p().hasPaid ?? [];
   const mode = () => p2p().mode;
   return (
     <table>
