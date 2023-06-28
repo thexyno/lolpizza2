@@ -8,9 +8,9 @@ export default defineConfig({
     monkey({
       entry: 'src/index.tsx',
       userscript: {
-        icon: 'https://vitejs.dev/logo.svg',
-        namespace: 'npm/vite-plugin-monkey',
-        match: ['https://*.lieferando.de/*', 'https://lolpizza.ragon.xyz/*', 'http://localhost:8080/*'],
+        icon: 'https://raw.githubusercontent.com/thexyno/lolpizza2/main/logo.png',
+        namespace: 'github.com/thexyno/lolpizza2',
+        match: ['https://*.lieferando.de/*', `${process.env.VITE_BACKEND_URL ?? "https://lolpizza.ragon.xyz/"}*`, 'http://localhost:8080/*'],
       },
     }),
   ],

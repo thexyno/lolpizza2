@@ -22,7 +22,7 @@
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
       # Nixpkgs instantiated for supported system types.
-      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; overlays = [ pnpm2nix.overlays.default ]; });
 
     in
     {
@@ -47,8 +47,8 @@
             };
             url = mkOption {
               type = types.str;
-              default = "https://lolpizza.ragon.xyz";
-              description = "the url to the frontend";
+              default = "https://lolpizza.ragon.xyz/";
+              description = "the url to the frontend. needs to end with a /";
             };
           };
           config = mkIf cfg.enable {
@@ -74,12 +74,16 @@
         in
         {
           default = self.packages.${system}.lp2 "https://lolpizza.ragon.xyz";
+          frontend = backendUrl:  pkgs.mkPnpmPackage {
+                src = ./frontend;
+                VITE_BACKEND_URL = backendUrl;
+              preBuild = ''
+                env
+              '';
+              };
           lp2 = backendUrl:
             let
-              frontend = pnpm2nix.mkPnpmPackage {
-                src = ./frontend;
-                BACKEND_URL = backendUrl;
-              };
+              frontend = self.packages.${system}.frontend backendUrl;
             in
             pkgs.buildGoModule {
               pname = "lolpizza2";
@@ -97,9 +101,9 @@
               # To begin with it is recommended to set this, but one must
               # remeber to bump this hash when your dependencies change.
               #vendorSha256 = pkgs.lib.fakeSha256;
-              beforeBuild = ''
-                mkdir -p $src/frontend/dist
-                cp ${frontend}.frontend}/dist/* $src/frontend/dist
+              preBuild = ''
+                mkdir -p ./frontend/dist
+                cp ${frontend}/* ./frontend/dist
               '';
 
               vendorSha256 = "sha256-Jk1ybSRlXwgWsA4YY+zoW9WmJePsx95Fuzcih6ciWys=";
