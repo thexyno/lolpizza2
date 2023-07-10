@@ -50,7 +50,12 @@ const Host: Component = () => {
         <button onClick={() => p2pFun.createNewHost()}>Clear Basket</button>
       </div>
       <div>
-        MOTD: <input type="text" value={p2p().motd} onInput={(e) => p2pFun.setMotd(e.currentTarget.value)} />
+        MOTD: <input type="text" value={p2p().motd} onKeyPress={(e) => {
+          var keyCode = e.code || e.key;
+          if (keyCode == 'Enter') {
+            p2pFun.setMotd(e.currentTarget.value);
+          }
+        }} />
       </div>
     </>
   );
